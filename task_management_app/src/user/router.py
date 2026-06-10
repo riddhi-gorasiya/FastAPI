@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from src.user.dtos import UserSchema, UserResponseSchema, LoginSchema
 from src.utils.db import get_db
 from src.user import controller
+from src.user.models import UserModel
+from src.utils.helpers import is_authenticated
 
 user_routes = APIRouter(prefix="/user")
 
@@ -15,5 +17,5 @@ def login(body:LoginSchema, db:Session=Depends(get_db)):
     return controller.login(body, db)
 
 @user_routes.get("/is_auth", response_model=UserResponseSchema, status_code=status.HTTP_200_OK)
-def is_auth(request:Request, db:Session=Depends(get_db)):
-    return controller.is_authenticated(request, db)
+def is_auth(user:UserModel=Depends(is_authenticated)):
+    return user

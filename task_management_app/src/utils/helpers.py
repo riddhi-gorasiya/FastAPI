@@ -1,17 +1,17 @@
-from fastapi import HTTPException, status, Request, Depends
+from fastapi import HTTPException, status, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from src.user.models import UserModel
 from src.utils.settings import settings
-import jwt 
+import jwt
 from jwt.exceptions import InvalidTokenError
 from src.utils.db import get_db
 
-def is_authenticated(request:Request, db:Session=Depends(get_db)):
+security = HTTPBearer()
+
+def is_authenticated(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
     try:
-        token = request.headers.get("authorization")
-        if not token:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are unauthorized!!")
-        token = token.split(" ")[-1]
+        token = credentials.credentials
         data = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
         user_id = data.get("_id")
         user = db.query(UserModel).filter(UserModel.id == user_id).first()
