@@ -7,9 +7,10 @@ from src.user.models import UserModel
 def create_task(body:TaskSchema, db:Session, user:UserModel):
     data = body.model_dump()
     new_task = TaskModel(
-        title=data["title"], 
-        description=data["description"], 
+        title=data["title"],
+        description=data["description"],
         is_completed=data["is_completed"],
+        status=data["status"],
         user_id = user.id
     )
     db.add(new_task)

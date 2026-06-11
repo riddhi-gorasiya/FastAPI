@@ -26,10 +26,10 @@ def create_refresh_token(user_id):
 async def register(body:UserSchema,db:Session):
     is_user = db.query(UserModel).filter(UserModel.username == body.username).first()
     if is_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists!!")
     is_user = db.query(UserModel).filter(UserModel.email == body.email).first()
     if is_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered!!")
     hash_password = get_password_hash(body.password)
     new_user = UserModel(
         name = body.name,
@@ -40,8 +40,12 @@ async def register(body:UserSchema,db:Session):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    res=await send_email([new_user.email])
-    print(res)
+    try:
+        res = await send_email([new_user.email])
+        print(res)
+    except Exception as e:
+        # Registration must succeed even if the confirmation email fails to send.
+        print(f"Failed to send registration email to {new_user.email}: {e}")
     return new_user
 
 def login(body:LoginSchema, db:Session):
