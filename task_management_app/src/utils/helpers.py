@@ -13,6 +13,8 @@ def is_authenticated(credentials: HTTPAuthorizationCredentials = Depends(securit
     try:
         token = credentials.credentials
         data = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+        if data.get("type") == "refresh":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Use access token, not refresh token!!")
         user_id = data.get("_id")
         user = db.query(UserModel).filter(UserModel.id == user_id).first()
         if not user:

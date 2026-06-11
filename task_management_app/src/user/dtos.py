@@ -16,4 +16,7 @@ class UserResponseSchema(BaseModel):
 class LoginSchema(BaseModel):
     username:str
     password:str
+
+class RefreshSchema(BaseModel):
+    refresh_token:str
     
